@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Pronostics Over Gratuits - Les Pronos De Davy</title>
+    <meta name="description" content="Pronostics over 1.5, 2.5, 3.5 gratuits pour le football sur les plus grandes ligues européennes et internationales.">
+    <meta name="keywords" content="pronostics football, over 2.5, paris sportifs gratuits, ligue des champions, premier league, les pronos de davy">
+    <style>
+        body { background-color: #f0f0f0; font-family: Arial, sans-serif; text-align: center; }
+        .container { margin: 50px auto; max-width: 500px; }
+        select, button { padding: 10px; margin: 5px; font-size: 16px; width: 200px; }
+        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        .error { color: red; }
+    </style>
+    <script>
+        function updateTeams() {
+            var ligue = document.getElementById("ligue").value;
+            var equipes = {{ ligues|tojson }};
+            var equipeA = document.getElementById("equipe_a");
+            var equipeB = document.getElementById("equipe_b");
+            equipeA.innerHTML = "";
+            equipeB.innerHTML = "";
+            equipes[ligue].forEach(function(equipe) {
+                var optionA = document.createElement("option");
+                var optionB = document.createElement("option");
+                optionA.value = equipe;
+                optionA.text = equipe;
+                optionB.value = equipe;
+                optionB.text = equipe;
+                equipeA.appendChild(optionA);
+                equipeB.appendChild(optionB);
+            });
+        }
+    </script>
+</head>
+<body onload="updateTeams()">
+    <div class="container">
+        <h1>Pronostics Over Gratuits</h1>
+        <p>Les Pronos De Davy</p>
+        <form method="POST">
+            <label>Ligue :</label><br>
+            <select name="ligue" id="ligue" onchange="updateTeams()">
+                {% for ligue in ligues.keys() %}
+                    <option value="{{ ligue }}" {% if ligue == selected_ligue %}selected{% endif %}>{{ ligue }}</option>
+                {% endfor %}
+            </select><br>
+            <label>Équipe 1 :</label><br>
+            <select name="equipe_a" id="equipe_a">
+                {% for equipe in equipes %}
+                    <option value="{{ equipe }}">{{ equipe }}</option>
+                {% endfor %}
+            </select><br>
+            <label>Équipe 2 :</label><br>
+            <select name="equipe_b" id="equipe_b">
+                {% for equipe in equipes %}
+                    <option value="{{ equipe }}">{{ equipe }}</option>
+                {% endfor %}
+            </select><br>
+            <label>Seuil :</label><br>
+            <select name="seuil">
+                <option value="Over 1.5">Over 1.5</option>
+                <option value="Over 2.5" selected>Over 2.5</option>
+                <option value="Over 3.5">Over 3.5</option>
+            </select><br>
+            <button type="submit">Prédire</button>
+        </form>
+        {% if erreur %}
+            <p class="error">{{ erreur }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Résultat - Pronostics Over Gratuits - Les Pronos De Davy</title>
+    <meta name="description" content="Résultat de votre pronostic over gratuit pour {{ equipe_a }} vs {{ equipe_b }} dans {{ ligue }} par Les Pronos De Davy.">
+    <meta name="keywords" content="pronostic football gratuit, over {{ seuil.split(' ')[1] }}, {{ ligue }}, {{ equipe_a }}, {{ equipe_b }}, les pronos de davy">
+    <style>
+        body { background-color: #f0f0f0; font-family: Arial, sans-serif; text-align: center; }
+        .container { margin: 50px auto; max-width: 500px; }
+        .result { font-size: 20px; color: {{ couleur }}; }
+        a { color: #4CAF50; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Résultat - Pronostics Over Gratuits</h1>
+        <p>Les Pronos De Davy</p>
+        <p class="result">
+            Match : {{ equipe_a }} vs {{ equipe_b }} ({{ ligue }})<br>
+            Probabilité {{ seuil }} : {{ proba|round(1) }}%
+        </p>
+        <a href="/">Retour</a>
+    </div>
+</body>
+</html>
