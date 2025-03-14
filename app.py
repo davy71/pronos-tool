@@ -86,6 +86,10 @@ def calculer_proba_over(buts_moy_a, buts_moy_b, seuil):
 
 @app.route("/", methods=["GET", "POST"])
 def home():
+    allowed_hosts = ["lespronosdedavy.com", "pronostics-over.onrender.com"]  # Autorise Render pour les tests
+    if request.host not in allowed_hosts:
+        return "Veuillez accéder à cet outil via lespronosdedavy.com", 403
+    # Le reste du code reste inchangé
     if request.method == "POST":
         ligue = request.form["ligue"]
         equipe_a = request.form["equipe_a"]
