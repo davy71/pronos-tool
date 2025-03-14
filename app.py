@@ -1,10 +1,16 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, Response
 import pandas as pd
 import math
 
 app = Flask(__name__)
 
-# Dictionnaire complet des ligues et equipes
+# Autoriser l'iframe uniquement depuis lespronosdedavy.com
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Frame-Options'] = 'ALLOW-FROM https://lespronosdedavy.com'
+    return response
+
+# Dictionnaire complet des ligues et équipes
 ligues = {
     "Premier League": [
         "Arsenal", "Aston Villa", "Bournemouth", "Brentford", "Brighton", "Chelsea", "Crystal Palace",
@@ -65,7 +71,7 @@ def obtenir_stats_equipe(nom_equipe, ligue):
     url = urls[ligue]
     try:
         dfs = pd.read_html(url)
-        stats_table = dfs[0]  # Premiere table contient les stats d'equipe
+        stats_table = dfs[0]  # Première table contient les stats d'équipe
         equipe_stats = stats_table[stats_table["Squad"] == nom_equipe]
         if not equipe_stats.empty:
             buts_marques = equipe_stats["GF"].values[0] / equipe_stats["MP"].values[0]  # Buts par match
@@ -73,7 +79,7 @@ def obtenir_stats_equipe(nom_equipe, ligue):
             return float(buts_marques), float(buts_encaisses)
     except:
         pass
-    return 1.5, 1.5  # Valeur par defaut si echec
+    return 1.5, 1.5  # Valeur par défaut si échec
 
 # Loi de Poisson
 def poisson_proba(buts_moyens, k):
@@ -86,10 +92,11 @@ def calculer_proba_over(buts_moy_a, buts_moy_b, seuil):
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    allowed_hosts = ["lespronosdedavy.com", "pronostics-over.onrender.com"]  # Autorise Render pour les tests
+    # Forcer les utilisateurs à passer par lespronosdedavy.com
+    allowed_hosts = ["lespronosdedavy.com", "pronostics-over.onrender.com"]  # Autorise Render pour l'iframe
     if request.host not in allowed_hosts:
         return "Veuillez accéder à cet outil via lespronosdedavy.com", 403
-    # Le reste du code reste inchangé
+
     if request.method == "POST":
         ligue = request.form["ligue"]
         equipe_a = request.form["equipe_a"]
@@ -97,7 +104,7 @@ def home():
         seuil = float(request.form["seuil"].replace("Over ", ""))
         
         if equipe_a == equipe_b:
-            return render_template("index.html", ligues=ligues, equipes=ligues[ligue], selected_ligue=ligue, erreur="Choisissez deux equipes differentes !")
+            return render_template("index.html", ligues=ligues, equipes=ligues[ligue], selected_ligue=ligue, erreur="Choisissez deux équipes différentes !")
         
         buts_marques_a, buts_encaisses_a = obtenir_stats_equipe(equipe_a, ligue)
         buts_marques_b, buts_encaisses_b = obtenir_stats_equipe(equipe_b, ligue)
