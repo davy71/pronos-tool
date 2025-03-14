@@ -4,10 +4,13 @@ import math
 
 app = Flask(__name__)
 
-# Autoriser l'iframe uniquement depuis lespronosdedavy.com
+# Ajouter des en-têtes de sécurité pour autoriser l'iframe depuis lespronosdedavy.com
 @app.after_request
 def add_security_headers(response):
+    # Autoriser l'iframe uniquement depuis lespronosdedavy.com
     response.headers['X-Frame-Options'] = 'ALLOW-FROM https://lespronosdedavy.com'
+    # Configurer CSP pour permettre l'iframe
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://lespronosdedavy.com"
     return response
 
 # Dictionnaire complet des ligues et équipes
@@ -92,9 +95,12 @@ def calculer_proba_over(buts_moy_a, buts_moy_b, seuil):
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    # Forcer les utilisateurs à passer par lespronosdedavy.com
-    allowed_hosts = ["lespronosdedavy.com", "pronostics-over.onrender.com"]  # Autorise Render pour l'iframe
-    if request.host not in allowed_hosts:
+    # Vérifier si la requête vient via l'iframe ou directement
+    referer = request.headers.get("Referer", "")
+    allowed_referer = "https://lespronosdedavy.com"
+    
+    # Bloquer l'accès direct (si pas de referer ou referer différent de ton site)
+    if not referer.startswith(allowed_referer):
         return "Veuillez accéder à cet outil via lespronosdedavy.com", 403
 
     if request.method == "POST":
